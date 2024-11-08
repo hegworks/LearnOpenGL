@@ -2,7 +2,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -17,8 +20,9 @@ void processInput(GLFWwindow* window)
 
 int main(int argc, char* argv[])
 {
-	printf("Hello world");
+	printf("Hello world\n");
 
+#ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO coninfo;
 	AllocConsole();
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
@@ -26,14 +30,14 @@ int main(int argc, char* argv[])
 	coninfo.dwSize.Y = 9999;
 	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
 	SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 700, 1000, 0);
-	//glfwShowWindow( window );
+#endif
 
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_POSITION_X, 700);
-	glfwWindowHint(GLFW_POSITION_Y, 80);
+	glfwWindowHint(GLFW_POSITION_Y, 80);           
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	if(window == NULL)
@@ -44,7 +48,6 @@ int main(int argc, char* argv[])
 	}
 	glfwMakeContextCurrent(window);
 
-
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -54,6 +57,8 @@ int main(int argc, char* argv[])
 	glViewport(0, 0, 800, 600);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
 	while(!glfwWindowShouldClose(window))
 	{
