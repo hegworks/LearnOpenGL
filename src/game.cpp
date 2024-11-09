@@ -150,7 +150,9 @@ int main(int argc, char* argv[])
 
 	//----------objects initialization
 	//-----points
-	float vertices[] =
+	constexpr int point_count = 6;
+	constexpr int floats_per_vertex = 3;
+	float vertices[point_count * 3] =
 	{
 	 0.5f,  0.5f, 0.0f,  // 0 top right
 	 0.5f, -0.5f, 0.0f,  // 1 bottom right
@@ -186,15 +188,16 @@ int main(int argc, char* argv[])
 	//=====Binding
 
 	// VertexAttribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0));
+	glVertexAttribPointer(0, floats_per_vertex, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)(0));
 	glEnableVertexAttribArray(0);
 
 	// UnBinding
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	//==========objects initialization
 
 	// Wireframe
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // comment out for default behavior
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // comment out for default behavior
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -209,7 +212,7 @@ int main(int argc, char* argv[])
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, point_count, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		//=====render
@@ -219,6 +222,10 @@ int main(int argc, char* argv[])
 		glfwPollEvents();
 	}
 
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteProgram(shaderProgram);
 	glfwTerminate();
 	return 0;
 }
