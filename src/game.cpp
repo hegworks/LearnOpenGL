@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 	//-----points
 	constexpr int point_count = 6;
 	constexpr int floats_per_vertex = 3;
-	float vertices[point_count * 3] =
+	float vertices[4 * 3] =
 	{
 	 0.5f,  0.5f, 0.0f,  // 0 top right
 	 0.5f, -0.5f, 0.0f,  // 1 bottom right
