@@ -105,7 +105,7 @@ unsigned int InitializeShaderProgram()
 
 	// compilation check
 	int shaderProgramSuccess;
-	glGetShaderiv(shaderProgram, GL_COMPILE_STATUS, &shaderProgramSuccess);
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &shaderProgramSuccess);
 	if(!shaderProgramSuccess)
 	{
 		char infoLog[512];
