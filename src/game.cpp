@@ -119,14 +119,14 @@ GLFWwindow* WindowSetup()
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
-		throw std::exception("Failed to create GLFW window");
+		return nullptr;
 	}
 	glfwMakeContextCurrent(window);
 
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
-		throw std::exception("Failed to initialize GLAD");
+		return nullptr;
 	}
 
 	glViewport(0, 0, 800, 600);
@@ -143,6 +143,8 @@ int main(int argc, char* argv[])
 	printf("Hello world\n");
 
 	GLFWwindow* window = WindowSetup();
+	if(window == nullptr) return -1;
+
 
 	unsigned int shaderProgram = InitializeShaderProgram();
 
