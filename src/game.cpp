@@ -150,17 +150,17 @@ int main(int argc, char* argv[])
 
 	//----------objects initialization
 	//-----points
-	float vertices[] =
+	constexpr int point_count = 6;
+	constexpr int floats_per_vertex = 3;
+	float vertices[point_count * 3] =
 	{
-	 0.5f,  0.5f, 0.0f,  // 0 top right
-	 0.5f, -0.5f, 0.0f,  // 1 bottom right
-	-0.5f, -0.5f, 0.0f,  // 2 bottom left
-	-0.5f,  0.5f, 0.0f   // 3 top left 
-	};
-	unsigned int indices[] =
-	{
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
+	-0.5f, 0.5f, 0.0f,
+	-0.75f, 0.0f, 0.0f,
+	-0.25f, 0.0f, 0.0f,
+
+	0.5f, 0.5f, 0.0f,
+	0.75f, 0.0f, 0.0f,
+	0.25f, 0.0f, 0.0f,
 	};
 	//=====points
 
@@ -170,9 +170,6 @@ int main(int argc, char* argv[])
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
-
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
 	//=====Initialization
 
 	//-----Binding
@@ -180,16 +177,14 @@ int main(int argc, char* argv[])
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	//=====Binding
 
 	// VertexAttribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0));
+	glVertexAttribPointer(0, floats_per_vertex, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)(0));
 	glEnableVertexAttribArray(0);
 
 	// UnBinding
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	//==========objects initialization
 
@@ -209,7 +204,7 @@ int main(int argc, char* argv[])
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, point_count);
 		glBindVertexArray(0);
 
 		//=====render
@@ -219,6 +214,9 @@ int main(int argc, char* argv[])
 		glfwPollEvents();
 	}
 
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteProgram(shaderProgram);
 	glfwTerminate();
 	return 0;
 }
