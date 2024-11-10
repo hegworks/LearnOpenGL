@@ -98,7 +98,6 @@ int main(int argc, char* argv[])
 
 	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Orange.frag");
 	shader.Use();
-	glUniform4f(shader.GetUniformLocation("ourColor"), 0.0f, 1.0f, 0.0f, 1.0f);
 
 	//----------objects initialization
 	//-----points
@@ -161,6 +160,12 @@ int main(int argc, char* argv[])
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//-----render
+
+		float timeValue = glfwGetTime();
+		float greenValue = sin(timeValue) / 2.0f + 0.5f;
+		float redValue = cos(timeValue) / 2.0f + 0.5f;
+		float blueValue = sin(timeValue) / 3.0f + 0.75f;
+		glUniform4f(shader.GetUniformLocation("ourColor"), redValue, greenValue, blueValue, 1.0f);
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, point_count, GL_UNSIGNED_INT, 0);
