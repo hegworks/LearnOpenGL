@@ -209,6 +209,7 @@
     <ClCompile Include="ThirdParty\src\glad.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Shader.h" />
     <ClInclude Include="ThirdParty\include\glad\glad.h" />
     <ClInclude Include="ThirdParty\include\GLFW\glfw3.h" />
     <ClInclude Include="ThirdParty\include\GLFW\glfw3native.h" />
