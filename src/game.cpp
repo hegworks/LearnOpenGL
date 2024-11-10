@@ -97,18 +97,23 @@ int main(int argc, char* argv[])
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
 
-	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Orange.frag");
+	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Fragment.frag");
 	shader.Use();
 
 	//----------objects initialization
 	//-----points
 	constexpr int point_count = 3;
-	constexpr int floats_per_vertex = 3;
-	float vertices[3 * 3] =
+	constexpr int position_parts = 3;
+	constexpr int color_parts = 3;
+	constexpr size_t stride = (position_parts + color_parts) * sizeof(float);
+	constexpr size_t position_offset = 0;
+	constexpr size_t color_offset = position_parts * sizeof(float);
+	float vertices[6 * 3] =
 	{
-		0.0f,		0.75f,		0.0f,	// top
-		-0.75f,		-0.75f,		0.0f,	// left
-		0.75f,		-0.75f,		0.0f,	// right
+		// positions			// colors
+		0.0f,	0.75f,	0.0f,	1.0f, 0.0f, 0.0f,	// top
+		-0.75f,	-0.75f,	0.0f,	0.0f, 1.0f, 0.0f,	// left
+		0.75f,	-0.75f,	0.0f,	0.0f, 0.0f, 1.0f	// right
 	};
 	//=====points
 
@@ -129,8 +134,10 @@ int main(int argc, char* argv[])
 	//=====Binding
 
 	// VertexAttribute
-	glVertexAttribPointer(0, floats_per_vertex, GL_FLOAT, GL_FALSE, floats_per_vertex * sizeof(float), (void*)(0));
+	glVertexAttribPointer(0, position_parts, GL_FLOAT, GL_FALSE, stride, (void*)(position_offset));
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, color_parts, GL_FLOAT, GL_FALSE, stride, (void*)(color_offset));
+	glEnableVertexAttribArray(1);
 
 	// UnBinding
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -139,9 +146,6 @@ int main(int argc, char* argv[])
 
 	// Wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // comment out for default behavior
-	int counter = 0;
-	constexpr int counterMax = 30;
-	random_reset_seed();
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -154,23 +158,8 @@ int main(int argc, char* argv[])
 
 		//-----render
 
-		if(counter < counterMax)
-		{
-			counter++;
-		}
-		else
-		{
-			counter = 0;
-
-			float greenValue = random_between_inclusive(0.0f, 1.0f);
-			float redValue = random_between_inclusive(0.0f, 1.0f);
-			float blueValue = random_between_inclusive(0.0f, 1.0f);
-			glUniform4f(shader.GetUniformLocation("ourColor"), redValue, greenValue, blueValue, 1.0f);
-		}
-
-
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, point_count);
 		glBindVertexArray(0);
 
 		//=====render
