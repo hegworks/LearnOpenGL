@@ -167,6 +167,10 @@ int main(int argc, char* argv[])
 	GLFWwindow* window = WindowSetup();
 	if(window == nullptr) return -1;
 
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
+
 
 	unsigned int shaderProgram = InitializeShaderProgram();
 
