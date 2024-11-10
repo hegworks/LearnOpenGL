@@ -97,7 +97,8 @@ int main(int argc, char* argv[])
 	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
 
 	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Orange.frag");
-	unsigned int shaderProgram = shader.ID;
+	shader.Use();
+	glUniform4f(shader.GetUniformLocation("ourColor"), 0.0f, 1.0f, 0.0f, 1.0f);
 
 	//----------objects initialization
 	//-----points
@@ -161,7 +162,6 @@ int main(int argc, char* argv[])
 
 		//-----render
 
-		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, point_count, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-	glDeleteProgram(shaderProgram);
+	shader.Delete();
 	glfwTerminate();
 	return 0;
 }

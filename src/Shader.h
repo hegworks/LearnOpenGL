@@ -24,6 +24,11 @@ public:
 		glUseProgram(ID);
 	}
 
+	void Delete()
+	{
+		glDeleteProgram(ID);
+	}
+
 	// utility uniform functions
 	GLint GetUniformLocation(const std::string& name) const
 	{
