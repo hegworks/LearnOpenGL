@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "Shader.h"
-#include "Tools/RNG.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -148,8 +147,18 @@ int main(int argc, char* argv[])
 	// Wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // comment out for default behavior
 
+
+	float deltaTime = 0;
+	float horizontalOffset = 0;
+	float horizontalOffsetSpeed = 0.5f;
+	float horizontalOffsetMax = 1.75f;
+	int isFlipped = 1;
 	while(!glfwWindowShouldClose(window))
 	{
+		double frameStartTime = glfwGetTime();
+
+		printf("dt: %f\n", deltaTime);
+
 		// input
 		processInput(window);
 
@@ -167,6 +176,15 @@ int main(int argc, char* argv[])
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+		horizontalOffset += horizontalOffsetSpeed * deltaTime;
+		if(horizontalOffset > horizontalOffsetMax)
+		{
+			horizontalOffset = -horizontalOffsetMax;
+			isFlipped = -isFlipped;
+			shader.SetInt("isVerticallyFlipped", isFlipped);
+		}
+		shader.SetFloat("horizontalOffset", horizontalOffset);
+
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, point_count);
 		glBindVertexArray(0);
@@ -176,6 +194,9 @@ int main(int argc, char* argv[])
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		double frameEndTime = glfwGetTime();
+		deltaTime = static_cast<float>(frameEndTime - frameStartTime);
 	}
 
 	glDeleteVertexArrays(1, &VAO);
