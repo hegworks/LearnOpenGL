@@ -158,6 +158,14 @@ int main(int argc, char* argv[])
 
 		//-----render
 
+		float timeValue = glfwGetTime();
+		vertices[3] = sin(timeValue) / 2.0f + 0.5f;
+		vertices[10] = cos(timeValue) / 2.0f + 0.5f;
+		vertices[17] = -sin(timeValue) / 2.0f + 0.5f;
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, point_count);
 		glBindVertexArray(0);
