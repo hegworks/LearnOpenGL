@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "Shader.h"
+#include "Tools/RNG.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -101,19 +102,13 @@ int main(int argc, char* argv[])
 
 	//----------objects initialization
 	//-----points
-	constexpr int point_count = 6;
+	constexpr int point_count = 3;
 	constexpr int floats_per_vertex = 3;
-	float vertices[4 * 3] =
+	float vertices[3 * 3] =
 	{
-	 0.5f,  0.5f, 0.0f,  // 0 top right
-	 0.5f, -0.5f, 0.0f,  // 1 bottom right
-	-0.5f, -0.5f, 0.0f,  // 2 bottom left
-	-0.5f,  0.5f, 0.0f   // 3 top left 
-	};
-	unsigned int indices[] =
-	{
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
+		0.0f,		0.75f,		0.0f,	// top
+		-0.75f,		-0.75f,		0.0f,	// left
+		0.75f,		-0.75f,		0.0f,	// right
 	};
 	//=====points
 
@@ -124,8 +119,6 @@ int main(int argc, char* argv[])
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
 
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
 	//=====Initialization
 
 	//-----Binding
@@ -133,9 +126,6 @@ int main(int argc, char* argv[])
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	//=====Binding
 
 	// VertexAttribute
@@ -149,6 +139,9 @@ int main(int argc, char* argv[])
 
 	// Wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // comment out for default behavior
+	int counter = 0;
+	constexpr int counterMax = 30;
+	random_reset_seed();
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -161,14 +154,23 @@ int main(int argc, char* argv[])
 
 		//-----render
 
-		float timeValue = glfwGetTime();
-		float greenValue = sin(timeValue) / 2.0f + 0.5f;
-		float redValue = cos(timeValue) / 2.0f + 0.5f;
-		float blueValue = sin(timeValue) / 3.0f + 0.75f;
-		glUniform4f(shader.GetUniformLocation("ourColor"), redValue, greenValue, blueValue, 1.0f);
+		if(counter < counterMax)
+		{
+			counter++;
+		}
+		else
+		{
+			counter = 0;
+
+			float greenValue = random_between_inclusive(0.0f, 1.0f);
+			float redValue = random_between_inclusive(0.0f, 1.0f);
+			float blueValue = random_between_inclusive(0.0f, 1.0f);
+			glUniform4f(shader.GetUniformLocation("ourColor"), redValue, greenValue, blueValue, 1.0f);
+		}
+
 
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, point_count, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);
 
 		//=====render
@@ -180,7 +182,6 @@ int main(int argc, char* argv[])
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
 	shader.Delete();
 	glfwTerminate();
 	return 0;
