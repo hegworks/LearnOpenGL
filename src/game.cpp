@@ -103,28 +103,59 @@ int main(int argc, char* argv[])
 
 	//----------texture
 
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	//-----
+	unsigned int containerTexture;
+	glGenTextures(1, &containerTexture);
 
+	unsigned int awesomefaceTexture;
+	glGenTextures(1, &awesomefaceTexture);
+	//=====
+
+	//-----
+	glBindTexture(GL_TEXTURE_2D, containerTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	int width, height, nrChannels;
-	unsigned char* textureData = stbi_load("Assets/container.jpg", &width, &height, &nrChannels, 0);
-	if(!textureData)
+
+	unsigned char* containerTextureData = stbi_load("Assets/container.jpg", &width, &height, &nrChannels, 0);
+	if(!containerTextureData)
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		std::cout << "Failed to load container.jpg texture" << std::endl;
 		return -1;
 	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	//=====
+
+	//-----
+	glBindTexture(GL_TEXTURE_2D, awesomefaceTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_set_flip_vertically_on_load(true);
+
+	unsigned char* awesomefaceTextureData = stbi_load("Assets/awesomeface.png", &width, &height, &nrChannels, 0);
+	if(!awesomefaceTextureData)
+	{
+		std::cout << "Failed to load awesomeface.png texture" << std::endl;
+		return -1;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, awesomefaceTextureData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//=====
+
+	//-----
+	shader.SetInt("uTexture0", 0);
+	shader.SetInt("uTexture1", 1);
+	//=====
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	stbi_image_free(textureData);
+	stbi_image_free(containerTextureData);
 
 	//==========texture
 
@@ -209,10 +240,16 @@ int main(int argc, char* argv[])
 
 		//-----render
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, containerTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, awesomefaceTexture);
+
 		glBindVertexArray(VAO);
-		glBindTexture(GL_TEXTURE_2D, texture);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 		glBindVertexArray(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		//=====render
 

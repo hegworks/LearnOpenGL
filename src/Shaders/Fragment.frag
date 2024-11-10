@@ -8,9 +8,11 @@ in vec2 ioTexCoord;
 out vec4 FragColor;
 
 // uniform
-uniform sampler2D uTexture;
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
 
 void main()
 {
-    FragColor = texture(uTexture, ioTexCoord) * vec4(ioColor,1.0);
+    FragColor = texture(uTexture0, ioTexCoord) * vec4(ioColor,1.0);
+    FragColor = mix(texture(uTexture0, ioTexCoord),texture(uTexture1, ioTexCoord),0.5);
 }
