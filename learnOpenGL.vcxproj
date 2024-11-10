@@ -207,6 +207,7 @@
   <ItemGroup>
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="ThirdParty\src\glad.c" />
+    <ClCompile Include="ThirdParty\src\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
@@ -215,6 +216,7 @@
     <ClInclude Include="ThirdParty\include\GLFW\glfw3.h" />
     <ClInclude Include="ThirdParty\include\GLFW\glfw3native.h" />
     <ClInclude Include="ThirdParty\include\KHR\khrplatform.h" />
+    <ClInclude Include="ThirdParty\include\STB\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

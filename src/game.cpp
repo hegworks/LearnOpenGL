@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "Shader.h"
+#include "STB/stb_image.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -100,18 +101,55 @@ int main(int argc, char* argv[])
 	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Fragment.frag");
 	shader.Use();
 
+	//----------texture
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nrChannels;
+	unsigned char* textureData = stbi_load("Assets/container.jpg", &width, &height, &nrChannels, 0);
+	if(!textureData)
+	{
+		std::cout << "Failed to load texture" << std::endl;
+		return -1;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(textureData);
+
+	//==========texture
+
 	//----------objects initialization
 	//-----points
-	constexpr int point_count = 3;
+	constexpr int point_count = 4;
 	constexpr int position_parts = 3;
-	constexpr size_t stride = (position_parts) * sizeof(float);
-	constexpr size_t position_offset = 0;
-	float vertices[3 * 3] =
+	constexpr int color_parts = 3;
+	constexpr int texture_parts = 2;
+	constexpr size_t stride = (position_parts + color_parts + texture_parts) * sizeof(float);
+	constexpr size_t position_offset = (0) * sizeof(float);
+	constexpr size_t color_offset = (position_parts) * sizeof(float);
+	constexpr size_t texture_offset = color_offset + color_parts * sizeof(float);
+	float vertices[(position_parts + color_parts + texture_parts) * point_count] =
 	{
-		// positions		
-		0.0f,	0.75f,	0.0f,	// top
-		-0.75f,	-0.75f,	0.0f,	// left
-		0.75f,	-0.75f,	0.0f,	// right
+		// positions			// colors				// texture coords
+		0.5f,	0.5f,	0.0f,	1.0f,	0.0f,	0.0f,	1.0f,	1.0f,	// top right
+		0.5f,	-0.5f,	0.0f,	0.0f,	1.0f,	0.0f,	1.0f,	0.0f,	// bottom right
+		-0.5f,	-0.5f,	0.0f,	0.0f,	0.0f,	1.0f,	0.0f,	0.0f,	// bottom left
+		-0.5f,	0.5f,	0.0f,	1.0f,	1.0f,	0.0f,	0.0f,	1.0f	// top left 
+	};
+	unsigned int indices[] =
+	{
+		1,2,3,
+		0,1,3,
 	};
 	//=====points
 
@@ -122,6 +160,8 @@ int main(int argc, char* argv[])
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
 
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
 	//=====Initialization
 
 	//-----Binding
@@ -129,15 +169,26 @@ int main(int argc, char* argv[])
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glCheckError();
 	//=====Binding
 
 	// VertexAttribute
 	glVertexAttribPointer(0, position_parts, GL_FLOAT, GL_FALSE, stride, (void*)(position_offset));
 	glEnableVertexAttribArray(0);
 
+	glVertexAttribPointer(1, color_parts, GL_FLOAT, GL_FALSE, stride, (void*)(color_offset));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, texture_parts, GL_FLOAT, GL_FALSE, stride, (void*)(texture_offset));
+	glEnableVertexAttribArray(2);
+
 	// UnBinding
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	//==========objects initialization
 
 	// Wireframe
@@ -159,7 +210,8 @@ int main(int argc, char* argv[])
 		//-----render
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, point_count);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		//=====render
@@ -174,6 +226,7 @@ int main(int argc, char* argv[])
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 	shader.Delete();
 	glfwTerminate();
 	return 0;
