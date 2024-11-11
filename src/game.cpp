@@ -43,13 +43,18 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 bool isUpKeyPressed = false;
 bool isDownKeyPressed = false;
+bool isLeftKeyPressed = false;
+bool isRightKeyPressed = false;
+bool isShiftKeyPressed = false;
+bool isCtrlKeyPressed = false;
 void processInput(GLFWwindow* window)
 {
 	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
-	else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+
+	if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
 		isUpKeyPressed = true;
 	}
@@ -57,6 +62,7 @@ void processInput(GLFWwindow* window)
 	{
 		isUpKeyPressed = false;
 	}
+
 	if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
 		isDownKeyPressed = true;
@@ -64,6 +70,42 @@ void processInput(GLFWwindow* window)
 	else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
 	{
 		isDownKeyPressed = false;
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		isLeftKeyPressed = true;
+	}
+	else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE)
+	{
+		isLeftKeyPressed = false;
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		isRightKeyPressed = true;
+	}
+	else if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
+	{
+		isRightKeyPressed = false;
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		isShiftKeyPressed = true;
+	}
+	else if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+	{
+		isShiftKeyPressed = false;
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		isCtrlKeyPressed = true;
+	}
+	else if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
+	{
+		isCtrlKeyPressed = false;
 	}
 }
 
@@ -240,18 +282,31 @@ int main(int argc, char* argv[])
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
+	//glm::vec3 cubePositions[] =
+	//{
+	//glm::vec3(0.0f,  0.0f,  0.0f),
+	//glm::vec3(2.0f,  5.0f, -15.0f),
+	//glm::vec3(-1.5f, -2.2f, -2.5f),
+	//glm::vec3(-3.8f, -2.0f, -12.3f),
+	//glm::vec3(2.4f, -0.4f, -3.5f),
+	//glm::vec3(-1.7f,  3.0f, -7.5f),
+	//glm::vec3(1.3f, -2.0f, -2.5f),
+	//glm::vec3(1.5f,  2.0f, -2.5f),
+	//glm::vec3(1.5f,  0.2f, -1.5f),
+	//glm::vec3(-1.3f,  1.0f, -1.5f)
+	//};
 	glm::vec3 cubePositions[] =
 	{
-	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(2.0f,  5.0f, -15.0f),
-	glm::vec3(-1.5f, -2.2f, -2.5f),
-	glm::vec3(-3.8f, -2.0f, -12.3f),
-	glm::vec3(2.4f, -0.4f, -3.5f),
-	glm::vec3(-1.7f,  3.0f, -7.5f),
-	glm::vec3(1.3f, -2.0f, -2.5f),
-	glm::vec3(1.5f,  2.0f, -2.5f),
-	glm::vec3(1.5f,  0.2f, -1.5f),
-	glm::vec3(-1.3f,  1.0f, -1.5f)
+	glm::vec3(0.0f,			0.0f,	0.0f),
+	glm::vec3(1.0f * 2.0f,	0.0f,	-1.0f * 2.0f),
+	glm::vec3(2.0f * 2.0f,	0.0f,	-1.0f * 2.0f),
+	glm::vec3(3.0f * 2.0f,	0.0f,	-1.0f * 2.0f),
+	glm::vec3(1.0f * 2.0f,	0.0f,	-2.0f * 2.0f),
+	glm::vec3(2.0f * 2.0f,	0.0f,	-2.0f * 2.0f),
+	glm::vec3(3.0f * 2.0f,	0.0f,	-2.0f * 2.0f),
+	glm::vec3(1.0f * 2.0f,	0.0f,	-3.0f * 2.0f),
+	glm::vec3(2.0f * 2.0f,	0.0f,	-3.0f * 2.0f),
+	glm::vec3(3.0f * 2.0f,	0.0f,	-3.0f * 2.0f)
 	};
 
 	//unsigned int indices[] =
@@ -311,19 +366,41 @@ int main(int argc, char* argv[])
 	float mixValue = 0.5f;
 	const float mixChangeSpeed = 0.6f;
 	constexpr glm::mat4 identity = glm::mat4(1.0f);
+	float x = 0;
+	float y = 20;
+	float z = 0;
+	const float viewChangeSpeed = 5.0f;
+	printf("x,y,z: %f,%f,%f\n", x, y, z);
 	while(!glfwWindowShouldClose(window))
 	{
 		const double frameStartTime = glfwGetTime();
 
 		// input
 		processInput(window);
+		//if(isDownKeyPressed || isUpKeyPressed)
+		//{
+		//	mixValue += isDownKeyPressed ? -mixChangeSpeed * deltaTime : +mixChangeSpeed * deltaTime;
+		//	mixValue = mixValue > 1.0f ? 1.0f : mixValue;
+		//	mixValue = mixValue < 0.0f ? 0.0f : mixValue;
+		//	shader.SetFloat("uMix", mixValue);
+		//}
+
+		if(isLeftKeyPressed || isRightKeyPressed)
+		{
+			x += isLeftKeyPressed ? -viewChangeSpeed * deltaTime : +viewChangeSpeed * deltaTime;
+			printf("x,y,z: %f,%f,%f\n", x, y, z);
+		}
 		if(isDownKeyPressed || isUpKeyPressed)
 		{
-			mixValue += isDownKeyPressed ? -mixChangeSpeed * deltaTime : +mixChangeSpeed * deltaTime;
-			mixValue = mixValue > 1.0f ? 1.0f : mixValue;
-			mixValue = mixValue < 0.0f ? 0.0f : mixValue;
-			shader.SetFloat("uMix", mixValue);
+			z += isDownKeyPressed ? -viewChangeSpeed * deltaTime : +viewChangeSpeed * deltaTime;
+			printf("x,y,z: %f,%f,%f\n", x, y, z);
 		}
+		if(isShiftKeyPressed || isCtrlKeyPressed)
+		{
+			y += isCtrlKeyPressed ? -viewChangeSpeed * deltaTime : +viewChangeSpeed * deltaTime;
+			printf("x,y,z: %f,%f,%f\n", x, y, z);
+		}
+
 
 		//-----render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -339,18 +416,27 @@ int main(int argc, char* argv[])
 		for(int i = 0; i < 10; ++i)
 		{
 			glm::mat4 model = identity;
+
 			model = glm::translate(model, cubePositions[i]);
-			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(20.0f * (i + 1)), glm::vec3(0.1 * i, ((i % 2) == 0 ? 1 : -1) * 0.1 * i, 0.0f));
+			if(i % 2 == 0)
+			{
+				model = glm::rotate(model, (float)glfwGetTime() * glm::radians(30.0f * (i + 1)), glm::vec3(0.0f, 1.0f, 1.0f));
+			}
+			else
+			{
+				model = glm::scale(model, glm::vec3(abs(sin(glfwGetTime())*2.0)));
+			}
 			glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
 		glm::mat4 view = identity;
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+		view = glm::rotate(view, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+		view = glm::translate(view, glm::vec3(-x, -y, z));
 		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 projection = identity;
-		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 		//=====transformations
 
