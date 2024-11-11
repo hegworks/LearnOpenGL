@@ -282,21 +282,17 @@ int main(int argc, char* argv[])
 		glBindVertexArray(VAO);
 
 		//-----transformations
-		glm::mat4 trans = identity;
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		glUniformMatrix4fv(shader.GetUniformLocation("uTransform"), 1, GL_FALSE, glm::value_ptr(trans));
-		//=====transformations
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glm::mat4 model = identity;
+		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
 
+		glm::mat4 view = identity;
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
 
-		//-----transformations
-		trans = identity;
-		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-		float scaleValue = abs(sin(glfwGetTime()));
-		glm::vec3 scale = glm::vec3(scaleValue);
-		trans = glm::scale(trans, scale);
-		glUniformMatrix4fv(shader.GetUniformLocation("uTransform"), 1, GL_FALSE, &trans[0][0]);
+		glm::mat4 projection = identity;
+		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 		//=====transformations
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

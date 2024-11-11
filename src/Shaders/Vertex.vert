@@ -10,11 +10,13 @@ out vec3 ioColor;
 out vec2 ioTexCoord;
 
 // uniform
-uniform mat4 uTransform = mat4(1.0f);
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProjection;
 
 void main()
 {
-   gl_Position = uTransform * vec4(iPos, 1.0);
+   gl_Position = uProjection * uView * uModel * vec4(iPos, 1.0);
    ioColor = iColor;
    ioTexCoord = iTexCoord;
 }
