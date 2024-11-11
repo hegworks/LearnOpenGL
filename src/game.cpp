@@ -117,8 +117,8 @@ int main(int argc, char* argv[])
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	int width, height, nrChannels;
 
@@ -137,8 +137,8 @@ int main(int argc, char* argv[])
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	unsigned char* awesomefaceTextureData = stbi_load("Assets/awesomeface.png", &width, &height, &nrChannels, 0);
 	if(!awesomefaceTextureData)
@@ -173,10 +173,10 @@ int main(int argc, char* argv[])
 	float vertices[(position_parts + color_parts + texture_parts) * point_count] =
 	{
 		// positions			// colors				// texture coords
-		0.5f,	0.5f,	0.0f,	1.0f,	0.0f,	0.0f,	2.0f,	2.0f,	// top right
-		0.5f,	-0.5f,	0.0f,	0.0f,	1.0f,	0.0f,	2.0f,	0.0f,	// bottom right
-		-0.5f,	-0.5f,	0.0f,	0.0f,	0.0f,	1.0f,	0.0f,	0.0f,	// bottom left
-		-0.5f,	0.5f,	0.0f,	1.0f,	1.0f,	0.0f,	0.0f,	2.0f	// top left 
+		0.5f,	0.5f,	0.0f,	1.0f,	0.0f,	0.0f,	0.6f,	0.6f,	// top right
+		0.5f,	-0.5f,	0.0f,	0.0f,	1.0f,	0.0f,	0.6f,	0.4f,	// bottom right
+		-0.5f,	-0.5f,	0.0f,	0.0f,	0.0f,	1.0f,	0.4f,	0.4f,	// bottom left
+		-0.5f,	0.5f,	0.0f,	1.0f,	1.0f,	0.0f,	0.4f,	0.6f	// top left 
 	};
 	unsigned int indices[] =
 	{
