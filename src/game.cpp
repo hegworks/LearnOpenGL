@@ -256,6 +256,7 @@ int main(int argc, char* argv[])
 	float deltaTime = 0;
 	float mixValue = 0.5f;
 	const float mixChangeSpeed = 0.6f;
+	constexpr glm::mat4 identity = glm::mat4(1.0f);
 	while(!glfwWindowShouldClose(window))
 	{
 		const double frameStartTime = glfwGetTime();
@@ -270,16 +271,6 @@ int main(int argc, char* argv[])
 			shader.SetFloat("uMix", mixValue);
 		}
 
-		//-----transformations
-		constexpr glm::mat4 identity = glm::mat4(1.0f);
-
-		glm::mat4 trans = identity;
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-
-		glUniformMatrix4fv(shader.GetUniformLocation("uTransform"), 1, GL_FALSE, glm::value_ptr(trans));
-		//=====transformations
-
 		//-----render
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -289,6 +280,24 @@ int main(int argc, char* argv[])
 		glBindTexture(GL_TEXTURE_2D, awesomefaceTexture);
 
 		glBindVertexArray(VAO);
+
+		//-----transformations
+		glm::mat4 trans = identity;
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(shader.GetUniformLocation("uTransform"), 1, GL_FALSE, glm::value_ptr(trans));
+		//=====transformations
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+		//-----transformations
+		trans = identity;
+		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+		float scaleValue = abs(sin(glfwGetTime()));
+		glm::vec3 scale = glm::vec3(scaleValue);
+		trans = glm::scale(trans, scale);
+		glUniformMatrix4fv(shader.GetUniformLocation("uTransform"), 1, GL_FALSE, &trans[0][0]);
+		//=====transformations
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glBindVertexArray(0);
