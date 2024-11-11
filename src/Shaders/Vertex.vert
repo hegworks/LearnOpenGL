@@ -9,9 +9,12 @@ layout (location = 2) in vec2 iTexCoord;
 out vec3 ioColor;
 out vec2 ioTexCoord;
 
+// uniform
+uniform mat4 uTransform = mat4(1.0f);
+
 void main()
 {
-   gl_Position = vec4(iPos, 1.0);
+   gl_Position = uTransform * vec4(iPos, 1.0);
    ioColor = iColor;
    ioTexCoord = iTexCoord;
 }

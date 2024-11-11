@@ -114,12 +114,6 @@ int main(int argc, char* argv[])
 {
 	printf("Hello world\n");
 
-	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-	vec = trans * vec;
-	std::cout << vec.x << vec.y << vec.z << std::endl;
-
 	GLFWwindow* window = WindowSetup();
 	if(window == nullptr) return -1;
 
@@ -202,10 +196,10 @@ int main(int argc, char* argv[])
 	float vertices[(position_parts + color_parts + texture_parts) * point_count] =
 	{
 		// positions			// colors				// texture coords
-		0.5f,	0.5f,	0.0f,	1.0f,	0.0f,	0.0f,	0.6f,	0.6f,	// top right
-		0.5f,	-0.5f,	0.0f,	0.0f,	1.0f,	0.0f,	0.6f,	0.4f,	// bottom right
-		-0.5f,	-0.5f,	0.0f,	0.0f,	0.0f,	1.0f,	0.4f,	0.4f,	// bottom left
-		-0.5f,	0.5f,	0.0f,	1.0f,	1.0f,	0.0f,	0.4f,	0.6f	// top left 
+		0.5f,	0.5f,	0.0f,	1.0f,	0.0f,	0.0f,	1.0f,	1.0f,	// top right
+		0.5f,	-0.5f,	0.0f,	0.0f,	1.0f,	0.0f,	1.0f,	0.0f,	// bottom right
+		-0.5f,	-0.5f,	0.0f,	0.0f,	0.0f,	1.0f,	0.0f,	0.0f,	// bottom left
+		-0.5f,	0.5f,	0.0f,	1.0f,	1.0f,	0.0f,	0.0f,	1.0f	// top left 
 	};
 	unsigned int indices[] =
 	{
@@ -252,10 +246,12 @@ int main(int argc, char* argv[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	//==========objects initialization
 
+	//----------other options
 	// Wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // comment out for default behavior
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	//==========other options
 
 	float deltaTime = 0;
 	float mixValue = 0.5f;
@@ -274,10 +270,18 @@ int main(int argc, char* argv[])
 			shader.SetFloat("uMix", mixValue);
 		}
 
-		// rendering
-		glClear(GL_COLOR_BUFFER_BIT);
+		//-----transformations
+		constexpr glm::mat4 identity = glm::mat4(1.0f);
+
+		glm::mat4 trans = identity;
+		trans = glm::translate(identity, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glUniformMatrix4fv(shader.GetUniformLocation("uTransform"), 1, GL_FALSE, glm::value_ptr(trans));
+		//=====transformations
 
 		//-----render
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, containerTexture);
