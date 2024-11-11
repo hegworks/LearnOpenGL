@@ -315,7 +315,7 @@ int main(int argc, char* argv[])
 
 		//-----transformations
 		glm::mat4 model = identity;
-		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f)); 
 		glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
 
 		glm::mat4 view = identity;
