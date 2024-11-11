@@ -38,10 +38,30 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+bool isUpKeyPressed = false;
+bool isDownKeyPressed = false;
 void processInput(GLFWwindow* window)
 {
 	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
 		glfwSetWindowShouldClose(window, true);
+	}
+	else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		isUpKeyPressed = true;
+	}
+	else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
+	{
+		isUpKeyPressed = false;
+	}
+	if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		isDownKeyPressed = true;
+	}
+	else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
+	{
+		isDownKeyPressed = false;
+	}
 }
 
 GLFWwindow* WindowSetup()
@@ -229,12 +249,21 @@ int main(int argc, char* argv[])
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 	float deltaTime = 0;
+	float mixValue = 0.5f;
+	const float mixChangeSpeed = 0.6f;
 	while(!glfwWindowShouldClose(window))
 	{
 		const double frameStartTime = glfwGetTime();
 
 		// input
 		processInput(window);
+		if(isDownKeyPressed || isUpKeyPressed)
+		{
+			mixValue += isDownKeyPressed ? -mixChangeSpeed * deltaTime : +mixChangeSpeed * deltaTime;
+			mixValue = mixValue > 1.0f ? 1.0f : mixValue;
+			mixValue = mixValue < 0.0f ? 0.0f : mixValue;
+			shader.SetFloat("uMix", mixValue);
+		}
 
 		// rendering
 		glClear(GL_COLOR_BUFFER_BIT);
