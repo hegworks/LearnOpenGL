@@ -274,8 +274,8 @@ int main(int argc, char* argv[])
 		constexpr glm::mat4 identity = glm::mat4(1.0f);
 
 		glm::mat4 trans = identity;
-		trans = glm::translate(identity, glm::vec3(0.5f, -0.5f, 0.0f));
 		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
 
 		glUniformMatrix4fv(shader.GetUniformLocation("uTransform"), 1, GL_FALSE, glm::value_ptr(trans));
 		//=====transformations
