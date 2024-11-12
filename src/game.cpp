@@ -402,6 +402,30 @@ int main(int argc, char* argv[])
 		}
 
 
+		//-----Camera
+		//glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+		//glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+		//glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget); // it's reverse
+		//glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+		//glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+		//glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
+		//glm::mat4 view;
+		//view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+		//				   glm::vec3(0.0f, 0.0f, 0.0f),
+		//				   glm::vec3(0.0f, 1.0f, 0.0f));
+
+		const float radius = 10.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		glm::mat4 view;
+		view = glm::lookAt(glm::vec3(camX, y, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+		//=====Camera
+
+
+
+
 		//-----render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -424,15 +448,15 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				model = glm::scale(model, glm::vec3(abs(sin(glfwGetTime())*2.0)));
+				model = glm::scale(model, glm::vec3(abs(sin(glfwGetTime()) * 2.0)));
 			}
 			glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		glm::mat4 view = identity;
-		view = glm::rotate(view, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-		view = glm::translate(view, glm::vec3(-x, -y, z));
+		//glm::mat4 view = identity;
+		//view = glm::rotate(view, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+		//view = glm::translate(view, glm::vec3(-x, -y, z));
 		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 projection = identity;
