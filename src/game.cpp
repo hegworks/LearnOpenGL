@@ -14,6 +14,9 @@
 #include <windows.h>
 #endif
 
+constexpr int SCRWIDTH = 800;
+constexpr int SCRHEIGHT = 600;
+
 GLenum glCheckError_(const char* file, int line)
 {
 	GLenum errorCode;
@@ -45,6 +48,12 @@ bool isUpKeyPressed = false;
 bool isDownKeyPressed = false;
 bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
+bool isShiftKeyPressed = false;
+float yaw = -90.0f;
+float pitch = 0;
+float lastX = SCRWIDTH / 2.0f;
+float lastY = SCRHEIGHT / 2.0f;
+bool firstMouse = true;
 void processInput(GLFWwindow* window)
 {
 	glfwSetWindowShouldClose(window, glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS);
@@ -53,6 +62,46 @@ void processInput(GLFWwindow* window)
 	isDownKeyPressed = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
 	isLeftKeyPressed = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
 	isRightKeyPressed = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+	isShiftKeyPressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if(firstMouse) // initially set to true
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos; // reversed since y-coordinates range from bottom to top
+	lastX = xpos;
+	lastY = ypos;
+
+	const float sensitivity = 0.05f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if(pitch > 89.0f)
+		pitch = 89.0f;
+	if(pitch < -89.0f)
+		pitch = -89.0f;
+}
+
+float fov = 45.0f;
+const float fov_max = 120.0f;
+const float fov_min = 1.0f;
+const float scroll_speed = 3.0f;
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	fov -= (float)yoffset * scroll_speed;
+	fov = max(fov_min, fov);
+	fov = min(fov_max, fov);
 }
 
 GLFWwindow* WindowSetup()
@@ -74,7 +123,7 @@ GLFWwindow* WindowSetup()
 	glfwWindowHint(GLFW_POSITION_X, 700);
 	glfwWindowHint(GLFW_POSITION_Y, 100);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCRWIDTH, SCRHEIGHT, "LearnOpenGL", NULL, NULL);
 	if(window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -89,11 +138,15 @@ GLFWwindow* WindowSetup()
 		return nullptr;
 	}
 
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, SCRWIDTH, SCRHEIGHT);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	return window;
 }
@@ -312,12 +365,12 @@ int main(int argc, char* argv[])
 	float mixValue = 0.5f;
 	const float mixChangeSpeed = 0.6f;
 	constexpr glm::mat4 identity = glm::mat4(1.0f);
-	const float cameraSpeed = 5.0f;
 
+	const float cameraSpeedDefault = 10.0f;
+	const float cameraSpeedBoosted = 20.0f;
 	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
 	while(!glfwWindowShouldClose(window))
 	{
 		const double frameStartTime = glfwGetTime();
@@ -332,7 +385,7 @@ int main(int argc, char* argv[])
 		//	shader.SetFloat("uMix", mixValue);
 		//}
 
-
+		float cameraSpeed = isShiftKeyPressed ? cameraSpeedBoosted : cameraSpeedDefault;
 		if(isUpKeyPressed)
 		{
 			cameraPos += cameraSpeed * cameraFront * deltaTime;
@@ -351,7 +404,15 @@ int main(int argc, char* argv[])
 		}
 
 
-		//-----Camera
+
+		glm::vec3 direction = glm::vec3(0);
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(direction);
+
+
+				//-----Camera
 
 		glm::mat4 view = identity;
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -395,7 +456,7 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 projection = identity;
-		projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(fov), 4.0f / 3.0f, 0.1f, 100.0f);
 		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 		//=====transformations
 
