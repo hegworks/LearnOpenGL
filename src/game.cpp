@@ -45,68 +45,14 @@ bool isUpKeyPressed = false;
 bool isDownKeyPressed = false;
 bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
-bool isShiftKeyPressed = false;
-bool isCtrlKeyPressed = false;
 void processInput(GLFWwindow* window)
 {
-	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, true);
-	}
+	glfwSetWindowShouldClose(window, glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS);
 
-	if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-	{
-		isUpKeyPressed = true;
-	}
-	else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
-	{
-		isUpKeyPressed = false;
-	}
-
-	if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-	{
-		isDownKeyPressed = true;
-	}
-	else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
-	{
-		isDownKeyPressed = false;
-	}
-
-	if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-	{
-		isLeftKeyPressed = true;
-	}
-	else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE)
-	{
-		isLeftKeyPressed = false;
-	}
-
-	if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-	{
-		isRightKeyPressed = true;
-	}
-	else if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
-	{
-		isRightKeyPressed = false;
-	}
-
-	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-	{
-		isShiftKeyPressed = true;
-	}
-	else if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
-	{
-		isShiftKeyPressed = false;
-	}
-
-	if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		isCtrlKeyPressed = true;
-	}
-	else if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
-	{
-		isCtrlKeyPressed = false;
-	}
+	isUpKeyPressed = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
+	isDownKeyPressed = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
+	isLeftKeyPressed = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
+	isRightKeyPressed = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 }
 
 GLFWwindow* WindowSetup()
@@ -366,11 +312,12 @@ int main(int argc, char* argv[])
 	float mixValue = 0.5f;
 	const float mixChangeSpeed = 0.6f;
 	constexpr glm::mat4 identity = glm::mat4(1.0f);
-	float x = 0;
-	float y = 20;
-	float z = 0;
-	const float viewChangeSpeed = 5.0f;
-	printf("x,y,z: %f,%f,%f\n", x, y, z);
+	const float cameraSpeed = 5.0f;
+
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 	while(!glfwWindowShouldClose(window))
 	{
 		const double frameStartTime = glfwGetTime();
@@ -385,41 +332,29 @@ int main(int argc, char* argv[])
 		//	shader.SetFloat("uMix", mixValue);
 		//}
 
-		if(isLeftKeyPressed || isRightKeyPressed)
+
+		if(isUpKeyPressed)
 		{
-			x += isLeftKeyPressed ? -viewChangeSpeed * deltaTime : +viewChangeSpeed * deltaTime;
-			printf("x,y,z: %f,%f,%f\n", x, y, z);
+			cameraPos += cameraSpeed * cameraFront * deltaTime;
 		}
-		if(isDownKeyPressed || isUpKeyPressed)
+		if(isDownKeyPressed)
 		{
-			z += isDownKeyPressed ? -viewChangeSpeed * deltaTime : +viewChangeSpeed * deltaTime;
-			printf("x,y,z: %f,%f,%f\n", x, y, z);
+			cameraPos -= cameraSpeed * cameraFront * deltaTime;
 		}
-		if(isShiftKeyPressed || isCtrlKeyPressed)
+		if(isLeftKeyPressed)
 		{
-			y += isCtrlKeyPressed ? -viewChangeSpeed * deltaTime : +viewChangeSpeed * deltaTime;
-			printf("x,y,z: %f,%f,%f\n", x, y, z);
+			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
+		}
+		if(isRightKeyPressed)
+		{
+			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
 		}
 
 
 		//-----Camera
-		//glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-		//glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-		//glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget); // it's reverse
-		//glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-		//glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-		//glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 
-		//glm::mat4 view;
-		//view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
-		//				   glm::vec3(0.0f, 0.0f, 0.0f),
-		//				   glm::vec3(0.0f, 1.0f, 0.0f));
-
-		const float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
-		glm::mat4 view;
-		view = glm::lookAt(glm::vec3(camX, y, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+		glm::mat4 view = identity;
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		//=====Camera
 
