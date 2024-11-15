@@ -1,20 +1,20 @@
 ﻿#pragma once
-#include <glm/glm.hpp>
 
+#include "Camera.h"
 #include "Common.h"
 
-class FreeFlyCamera
+class FreeFlyCamera : public Camera
 {
 public:
 	FreeFlyCamera();
 	~FreeFlyCamera();
 
-	void MouseCallback(double xPos, double yPos);
-	void ProcessInput(GLFWwindow* window);
-	void Update(float deltaTime);
+	virtual void MouseCallback(double xPos, double yPos);
+	virtual void ProcessInput(GLFWwindow* window);
+	virtual void Update(float deltaTime);
 
-	void GetCameraProperties(glm::vec3& pos, glm::vec3& front, glm::vec3& up) const;
-	float GetFov() const { return m_fov; }
+	virtual void GetCameraProperties(glm::vec3& pos, glm::vec3& front, glm::vec3& up) const;
+	virtual float GetFov() const { return m_fov; }
 
 private:
 	// settings

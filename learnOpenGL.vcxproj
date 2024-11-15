@@ -210,8 +210,9 @@
     <ClCompile Include="ThirdParty\src\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Camera\Camera.h" />
     <ClInclude Include="src\Common.h" />
-    <ClInclude Include="src\FreeFlyCamera.h" />
+    <ClInclude Include="src\Camera\FreeFlyCamera.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Tools\RNG.h" />
     <ClInclude Include="ThirdParty\include\glad\glad.h" />

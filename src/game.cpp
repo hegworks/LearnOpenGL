@@ -7,8 +7,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+#include "Camera/FreeFlyCamera.h"
 #include "Common.h"
-#include "FreeFlyCamera.h"
 #include "Shader.h"
 #include "STB/stb_image.h"
 
@@ -16,7 +16,7 @@
 #include <windows.h>
 #endif
 
-FreeFlyCamera* m_freeFlyCamera = nullptr;
+Camera* m_freeFlyCamera = nullptr;
 
 GLenum glCheckError_(const char* file, int line)
 {
