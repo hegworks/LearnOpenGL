@@ -22,7 +22,7 @@ private:
 	const float FOV_DEFAULT = 45.0f;
 	const float SPEED_DEFAULT = 10.0f;
 	const float SPEED_BOOSTED = 20.0f;
-	const glm::vec3 POS_INITIAL = glm::vec3(0.0f, 0.0f, 3.0f);
+	const glm::vec3 POS_INITIAL = glm::vec3(0.0f, 2.0f, 0.0f);
 	const glm::vec3 UP = glm::vec3(0.0f, 1.0f, 0.0f);
 	const glm::vec3 FRONT_INITIAL = glm::vec3(0.0f, 1.0f, 0.0f);
 	const float PITCH_MAX = 89.0f;

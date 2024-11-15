@@ -312,21 +312,15 @@ int main(int argc, char* argv[])
 		glBindVertexArray(VAO);
 
 		//-----transformations
-		for(int i = 0; i < 10; ++i)
+		for(int i = -25; i < 25; i++)
 		{
-			glm::mat4 model = identity;
-
-			model = glm::translate(model, cubePositions[i]);
-			if(i % 2 == 0)
+			for(int j = -25; j < 25; j++)
 			{
-				model = glm::rotate(model, (float)glfwGetTime() * glm::radians(30.0f * (i + 1)), glm::vec3(0.0f, 1.0f, 1.0f));
+				glm::mat4 model = identity;
+				model = glm::translate(model, glm::vec3(j, 0, i));
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+				glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
 			}
-			else
-			{
-				model = glm::scale(model, glm::vec3(abs(sin(glfwGetTime()) * 2.0)));
-			}
-			glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
 		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
@@ -334,6 +328,7 @@ int main(int argc, char* argv[])
 		glm::mat4 projection = identity;
 		projection = glm::perspective(glm::radians(m_freeFlyCamera->GetFov()), 4.0f / 3.0f, 0.1f, 100.0f);
 		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
+
 		//=====transformations
 
 
