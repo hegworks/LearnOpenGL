@@ -12,12 +12,14 @@ public:
 	virtual void MouseCallback(double xPos, double yPos);
 	virtual void ProcessInput(GLFWwindow* window);
 	virtual void Update(float deltaTime);
+	virtual void KeyDown(int glfwKey);
+	virtual void KeyUp(int glfwKey);
 
 	virtual void GetCameraProperties(glm::vec3& pos, glm::vec3& front, glm::vec3& up) const;
 	virtual float GetFov() const { return m_fov; }
 
 private:
-	// settings
+	//------settings
 	const float YAW_DEFAULT = -90.0f;
 	const float FOV_DEFAULT = 45.0f;
 	const float SPEED_DEFAULT = 10.0f;
@@ -35,8 +37,16 @@ private:
 	const int ASCEND_KEY = GLFW_KEY_Q;
 	const int DESCEND_KEY = GLFW_KEY_E;
 	const int SPEED_BOOST_KEY = GLFW_KEY_LEFT_SHIFT;
+	static constexpr int JUMP_KEY = GLFW_KEY_SPACE;
 
-	// variables
+	// jump
+	const float JUMP_HEIGHT = 5.0f;
+	const float GRAVITY = -9.8f;
+	const int MULTI_JUMP_COUNT = 2;
+   //=====settings
+
+
+   //-----variables
 	double m_yaw = YAW_DEFAULT;
 	double m_pitch = 0;
 	float m_fov = FOV_DEFAULT;
@@ -55,6 +65,13 @@ private:
 	bool m_isBoostKeyPressed = false;
 	bool m_isAscendKeyPressed = false;
 	bool m_isDescendKeyPressed = false;
+
+	// jump
+	bool m_isJumpKeyPressed = false;
+	bool m_isGrounded = true;
+	float m_velocityY = 0.0f;
+	int m_multiJumpsJumped = 0;
+	//======variables
 };
 
 inline FPSCamera::FPSCamera()
@@ -102,23 +119,65 @@ inline void FPSCamera::ProcessInput(GLFWwindow* window)
 	m_isBoostKeyPressed = glfwGetKey(window, SPEED_BOOST_KEY) == GLFW_PRESS;
 }
 
+inline void FPSCamera::KeyDown(int glfwKey)
+{
+	switch(glfwKey)
+	{
+		case JUMP_KEY:
+			m_isJumpKeyPressed = true;
+			break;
+		default:
+			break;
+	}
+}
+
+inline void FPSCamera::KeyUp(int glfwKey)
+{
+	switch(glfwKey)
+	{
+		case JUMP_KEY:
+			m_isJumpKeyPressed = false;
+			break;
+		default:
+			break;
+	}
+}
+
 inline void FPSCamera::Update(float deltaTime)
 {
 	const float cameraSpeed = m_isBoostKeyPressed ? SPEED_BOOSTED : SPEED_DEFAULT;
 	if(m_isUpKeyPressed)
-		m_pos += cameraSpeed * m_front * deltaTime;
+		m_pos += cameraSpeed * glm::vec3(m_front.x, 0, m_front.z) * deltaTime;
 	if(m_isDownKeyPressed)
-		m_pos -= cameraSpeed * m_front * deltaTime;
+		m_pos -= cameraSpeed * glm::vec3(m_front.x, 0, m_front.z) * deltaTime;
 	if(m_isLeftKeyPressed)
 		m_pos -= glm::normalize(glm::cross(m_front, UP)) * cameraSpeed * deltaTime;
 	if(m_isRightKeyPressed)
 		m_pos += glm::normalize(glm::cross(m_front, UP)) * cameraSpeed * deltaTime;
-	if(m_isAscendKeyPressed)
-		m_pos.y += cameraSpeed * deltaTime;
-	if(m_isDescendKeyPressed)
-		m_pos.y -= cameraSpeed * deltaTime;
 
-	m_pos.y = POS_INITIAL.y;
+
+	//-----jump
+	if(m_isJumpKeyPressed && (m_isGrounded || m_multiJumpsJumped < MULTI_JUMP_COUNT))
+	{
+		m_velocityY = JUMP_HEIGHT;
+		m_isJumpKeyPressed = false;
+		m_isGrounded = false;
+		m_multiJumpsJumped++;
+	}
+	// gravity
+	m_velocityY += GRAVITY * deltaTime;
+
+	// apply velocity
+	m_pos.y += m_velocityY * deltaTime;
+
+	// check ground
+	if(m_pos.y < POS_INITIAL.y)
+	{
+		m_pos.y = POS_INITIAL.y;
+		m_isGrounded = true;
+		m_multiJumpsJumped = 0;
+	}
+	//=====jump
 
 	glm::vec3 direction;
 	const float yawF = static_cast<float>(m_yaw);

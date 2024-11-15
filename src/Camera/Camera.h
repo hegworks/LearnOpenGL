@@ -6,6 +6,8 @@ public:
 	virtual ~Camera() = default;
 
 	virtual void MouseCallback(double xPos, double yPos) = 0;
+	virtual void KeyDown(int glfwKey) = 0;
+	virtual void KeyUp(int glfwKey) = 0;
 	virtual void ProcessInput(GLFWwindow* window) = 0;
 	virtual void Update(float deltaTime) = 0;
 

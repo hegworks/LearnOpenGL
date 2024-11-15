@@ -7,7 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-#include "Camera/FreeFlyCamera.h"
 #include "Common.h"
 #include "Shader.h"
 #include "STB/stb_image.h"
@@ -16,9 +15,10 @@
 #include <windows.h>
 #endif
 #include "Camera/FPSCamera.h"
+#include "Camera/FreeFlyCamera.h"
 #include "Tools/GlCheckError.h"
 
-Camera* m_freeFlyCamera = nullptr;
+Camera* m_camera = nullptr;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -28,12 +28,24 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 void processInput(GLFWwindow* window)
 {
 	glfwSetWindowShouldClose(window, glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS);
-	m_freeFlyCamera->ProcessInput(window);
+	m_camera->ProcessInput(window);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	m_freeFlyCamera->MouseCallback(xpos, ypos);
+	m_camera->MouseCallback(xpos, ypos);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if(action == GLFW_PRESS)
+	{
+		m_camera->KeyDown(key);
+	}
+	if(action == GLFW_RELEASE)
+	{
+		m_camera->KeyUp(key);
+	}
 }
 
 GLFWwindow* WindowSetup()
@@ -78,6 +90,7 @@ GLFWwindow* WindowSetup()
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	return window;
 }
@@ -96,7 +109,7 @@ int main(int argc, char* argv[])
 	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Fragment.frag");
 	shader.Use();
 
-	m_freeFlyCamera = new FPSCamera();
+	m_camera = new FPSCamera();
 
 	//----------texture
 
@@ -296,9 +309,9 @@ int main(int argc, char* argv[])
 		//}
 
 		//-----Camera
-		m_freeFlyCamera->Update(deltaTime);
+		m_camera->Update(deltaTime);
 		glm::vec3 cameraPos, cameraFront, cameraUp;
-		m_freeFlyCamera->GetCameraProperties(cameraPos, cameraFront, cameraUp);
+		m_camera->GetCameraProperties(cameraPos, cameraFront, cameraUp);
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		//=====Camera
 
@@ -327,7 +340,7 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 projection = identity;
-		projection = glm::perspective(glm::radians(m_freeFlyCamera->GetFov()), 4.0f / 3.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(m_camera->GetFov()), 4.0f / 3.0f, 0.1f, 100.0f);
 		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		//=====transformations

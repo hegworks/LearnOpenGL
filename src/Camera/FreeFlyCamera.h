@@ -12,6 +12,8 @@ public:
 	virtual void MouseCallback(double xPos, double yPos);
 	virtual void ProcessInput(GLFWwindow* window);
 	virtual void Update(float deltaTime);
+	virtual void KeyDown(int glfwKey) {};
+	virtual void KeyUp(int glfwKey) {};
 
 	virtual void GetCameraProperties(glm::vec3& pos, glm::vec3& front, glm::vec3& up) const;
 	virtual float GetFov() const { return m_fov; }
