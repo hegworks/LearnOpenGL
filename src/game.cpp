@@ -7,6 +7,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+#include "Common.h"
+#include "FreeFlyCamera.h"
 #include "Shader.h"
 #include "STB/stb_image.h"
 
@@ -14,8 +16,7 @@
 #include <windows.h>
 #endif
 
-constexpr int SCRWIDTH = 800;
-constexpr int SCRHEIGHT = 600;
+FreeFlyCamera* m_freeFlyCamera = nullptr;
 
 GLenum glCheckError_(const char* file, int line)
 {
@@ -44,64 +45,15 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-bool isUpKeyPressed = false;
-bool isDownKeyPressed = false;
-bool isLeftKeyPressed = false;
-bool isRightKeyPressed = false;
-bool isShiftKeyPressed = false;
-float yaw = -90.0f;
-float pitch = 0;
-float lastX = SCRWIDTH / 2.0f;
-float lastY = SCRHEIGHT / 2.0f;
-bool firstMouse = true;
 void processInput(GLFWwindow* window)
 {
 	glfwSetWindowShouldClose(window, glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS);
-
-	isUpKeyPressed = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
-	isDownKeyPressed = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
-	isLeftKeyPressed = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
-	isRightKeyPressed = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
-	isShiftKeyPressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+	m_freeFlyCamera->ProcessInput(window);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	if(firstMouse) // initially set to true
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // reversed since y-coordinates range from bottom to top
-	lastX = xpos;
-	lastY = ypos;
-
-	const float sensitivity = 0.05f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if(pitch > 89.0f)
-		pitch = 89.0f;
-	if(pitch < -89.0f)
-		pitch = -89.0f;
-}
-
-float fov = 45.0f;
-const float fov_max = 120.0f;
-const float fov_min = 1.0f;
-const float scroll_speed = 3.0f;
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	fov -= (float)yoffset * scroll_speed;
-	fov = max(fov_min, fov);
-	fov = min(fov_max, fov);
+	m_freeFlyCamera->MouseCallback(xpos, ypos);
 }
 
 GLFWwindow* WindowSetup()
@@ -146,7 +98,6 @@ GLFWwindow* WindowSetup()
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
 
 	return window;
 }
@@ -164,6 +115,8 @@ int main(int argc, char* argv[])
 
 	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Fragment.frag");
 	shader.Use();
+
+	m_freeFlyCamera = new FreeFlyCamera();
 
 	//----------texture
 
@@ -281,19 +234,6 @@ int main(int argc, char* argv[])
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
-	//glm::vec3 cubePositions[] =
-	//{
-	//glm::vec3(0.0f,  0.0f,  0.0f),
-	//glm::vec3(2.0f,  5.0f, -15.0f),
-	//glm::vec3(-1.5f, -2.2f, -2.5f),
-	//glm::vec3(-3.8f, -2.0f, -12.3f),
-	//glm::vec3(2.4f, -0.4f, -3.5f),
-	//glm::vec3(-1.7f,  3.0f, -7.5f),
-	//glm::vec3(1.3f, -2.0f, -2.5f),
-	//glm::vec3(1.5f,  2.0f, -2.5f),
-	//glm::vec3(1.5f,  0.2f, -1.5f),
-	//glm::vec3(-1.3f,  1.0f, -1.5f)
-	//};
 	glm::vec3 cubePositions[] =
 	{
 	glm::vec3(0.0f,			0.0f,	0.0f),
@@ -307,12 +247,6 @@ int main(int argc, char* argv[])
 	glm::vec3(2.0f * 2.0f,	0.0f,	-3.0f * 2.0f),
 	glm::vec3(3.0f * 2.0f,	0.0f,	-3.0f * 2.0f)
 	};
-
-	//unsigned int indices[] =
-	//{
-	//	1,2,3,
-	//	0,1,3,
-	//};
 	//=====points
 
 	//-----Initialization
@@ -366,11 +300,7 @@ int main(int argc, char* argv[])
 	const float mixChangeSpeed = 0.6f;
 	constexpr glm::mat4 identity = glm::mat4(1.0f);
 
-	const float cameraSpeedDefault = 10.0f;
-	const float cameraSpeedBoosted = 20.0f;
-	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 	while(!glfwWindowShouldClose(window))
 	{
 		const double frameStartTime = glfwGetTime();
@@ -385,42 +315,12 @@ int main(int argc, char* argv[])
 		//	shader.SetFloat("uMix", mixValue);
 		//}
 
-		float cameraSpeed = isShiftKeyPressed ? cameraSpeedBoosted : cameraSpeedDefault;
-		if(isUpKeyPressed)
-		{
-			cameraPos += cameraSpeed * cameraFront * deltaTime;
-		}
-		if(isDownKeyPressed)
-		{
-			cameraPos -= cameraSpeed * cameraFront * deltaTime;
-		}
-		if(isLeftKeyPressed)
-		{
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
-		}
-		if(isRightKeyPressed)
-		{
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
-		}
-
-
-
-		glm::vec3 direction = glm::vec3(0);
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		cameraFront = glm::normalize(direction);
-
-
-				//-----Camera
-
-		glm::mat4 view = identity;
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
+		//-----Camera
+		m_freeFlyCamera->Update(deltaTime);
+		glm::vec3 cameraPos, cameraFront, cameraUp;
+		m_freeFlyCamera->GetCameraProperties(cameraPos, cameraFront, cameraUp);
+		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		//=====Camera
-
-
-
 
 		//-----render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -450,13 +350,10 @@ int main(int argc, char* argv[])
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		//glm::mat4 view = identity;
-		//view = glm::rotate(view, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-		//view = glm::translate(view, glm::vec3(-x, -y, z));
 		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 projection = identity;
-		projection = glm::perspective(glm::radians(fov), 4.0f / 3.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(m_freeFlyCamera->GetFov()), 4.0f / 3.0f, 0.1f, 100.0f);
 		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 		//=====transformations
 
