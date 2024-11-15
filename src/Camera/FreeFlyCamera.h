@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "../Common.h"
 #include "Camera.h"
-#include "Common.h"
 
 class FreeFlyCamera : public Camera
 {
@@ -28,7 +28,11 @@ private:
 	const glm::vec3 UP = glm::vec3(0.0f, 1.0f, 0.0f);
 	const glm::vec3 FRONT_INITIAL = glm::vec3(0.0f, 1.0f, 0.0f);
 	const float PITCH_MAX = 89.0f;
+#ifdef _WIN32
 	const float MOUSE_SENSITIVITY = 0.05f;
+#elif __linux__
+	const float MOUSE_SENSITIVITY = 0.01f;
+#endif
 
 	const int UP_KEY = GLFW_KEY_W;
 	const int DOWN_KEY = GLFW_KEY_S;

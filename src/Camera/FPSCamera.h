@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "../Common.h"
 #include "Camera.h"
-#include "Common.h"
 
 class FPSCamera : public Camera
 {
