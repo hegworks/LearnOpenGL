@@ -15,6 +15,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include "Camera/FPSCamera.h"
 #include "Tools/GlCheckError.h"
 
 Camera* m_freeFlyCamera = nullptr;
@@ -95,7 +96,7 @@ int main(int argc, char* argv[])
 	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Fragment.frag");
 	shader.Use();
 
-	m_freeFlyCamera = new FreeFlyCamera();
+	m_freeFlyCamera = new FPSCamera();
 
 	//----------texture
 

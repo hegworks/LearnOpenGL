@@ -59,5 +59,8 @@
     <ClInclude Include="src\Tools\GlCheckError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Camera\FPSCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

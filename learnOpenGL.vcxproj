@@ -211,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera\Camera.h" />
+    <ClInclude Include="src\Camera\FPSCamera.h" />
     <ClInclude Include="src\Common.h" />
     <ClInclude Include="src\Camera\FreeFlyCamera.h" />
     <ClInclude Include="src\Shader.h" />
