@@ -216,6 +216,7 @@
     <ClInclude Include="src\Camera\FPSCamera.h" />
     <ClInclude Include="src\Common.h" />
     <ClInclude Include="src\Camera\FreeFlyCamera.h" />
+    <ClInclude Include="src\Mesh\Mesh.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Tools\GlCheckError.h" />
     <ClInclude Include="src\Tools\RNG.h" />

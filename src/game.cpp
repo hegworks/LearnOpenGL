@@ -10,13 +10,14 @@
 #include "Common.h"
 #include "Shader.h"
 #include "STB/stb_image.h"
+#include "Tools/GlCheckError.h"
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
+
 #include "Camera/FPSCamera.h"
 #include "Camera/FreeFlyCamera.h"
-#include "Tools/GlCheckError.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
