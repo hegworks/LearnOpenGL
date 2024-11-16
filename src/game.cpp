@@ -80,6 +80,13 @@ GLFWwindow* WindowSetup()
 	}
 	glfwMakeContextCurrent(window);
 
+#if defined(__linux__) && !defined(FULLSCREEN)
+	glfwSetWindowPos(window, 0, 50);
+	glfwShowWindow(window);
+	glfwSetWindowSize(window, SCRWIDTH, SCRHEIGHT);
+	glfwSetWindowPos(window, 0, 50);
+#endif // defined(__linux__) && !defined(FULLSCREEN)
+
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
