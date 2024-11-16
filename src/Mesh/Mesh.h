@@ -1,4 +1,5 @@
 #pragma once
+#include <assimp/types.h>
 #include <vector>
 
 #include "../Shader.h"
@@ -15,6 +16,7 @@ struct Texture
 {
 	unsigned int m_id;
 	std::string m_type;
+	aiString m_path;
 };
 
 class Mesh

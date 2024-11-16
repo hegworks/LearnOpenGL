@@ -19,9 +19,7 @@
 #include "Camera/FPSCamera.h"
 #include "Camera/FreeFlyCamera.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include "Model/Model.h"
 
 Camera* m_camera = nullptr;
 
@@ -131,9 +129,6 @@ int main(int argc, char* argv[])
 
 	m_camera = new FPSCamera();
 
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("path", aiProcess_Triangulate | aiProcess_FlipUVs);
-
 	//----------texture
 
 	//-----
@@ -206,48 +201,48 @@ int main(int argc, char* argv[])
 	constexpr size_t color_offset = (position_parts) * sizeof(float);
 	constexpr size_t texture_offset = color_offset + color_parts * sizeof(float);
 	float vertices[] = {
-	//position			  //textureCoords
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		//position			  //textureCoords
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
 	glm::vec3 cubePositions[] =
@@ -316,6 +311,9 @@ int main(int argc, char* argv[])
 	const float mixChangeSpeed = 0.6f;
 	constexpr glm::mat4 identity = glm::mat4(1.0f);
 
+	Shader modelShader = Shader("src/Shaders/Model.vert", "src/Shaders/Model.frag");
+	Model* backpack = new Model("Assets/Models/Backpack/backpack.obj");
+
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -341,6 +339,9 @@ int main(int argc, char* argv[])
 		//-----render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//===Boxes
+		shader.Use();
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, containerTexture);
 		glActiveTexture(GL_TEXTURE1);
@@ -348,7 +349,12 @@ int main(int argc, char* argv[])
 
 		glBindVertexArray(VAO);
 
-		//-----transformations
+		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
+
+		glm::mat4 projection = identity;
+		projection = glm::perspective(glm::radians(m_camera->GetFov()), 16.0f / 9.0f, 0.1f, 100.0f);
+		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
+
 		for(int i = -25; i < 25; i++)
 		{
 			for(int j = -25; j < 25; j++)
@@ -359,12 +365,20 @@ int main(int argc, char* argv[])
 				glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
 			}
 		}
+		//---Boxes
 
-		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
+		//===Backpack
+		modelShader.Use();
 
-		glm::mat4 projection = identity;
-		projection = glm::perspective(glm::radians(m_camera->GetFov()), 16.0f / 9.0f, 0.1f, 100.0f);
-		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(modelShader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
+
+		glUniformMatrix4fv(modelShader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		glm::mat4 bpModel = identity;
+		bpModel = glm::translate(bpModel, glm::vec3(-2, 2, -2));
+		glUniformMatrix4fv(modelShader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(bpModel));
+		backpack->Draw(modelShader);
+		//---Backpack
 
 		//=====transformations
 
@@ -386,6 +400,7 @@ int main(int argc, char* argv[])
 	glDeleteBuffers(1, &VBO);
 	//glDeleteBuffers(1, &EBO);
 	shader.Delete();
+	modelShader.Delete();
 	glfwTerminate();
 	return 0;
 }
