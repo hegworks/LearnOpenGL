@@ -18,6 +18,10 @@
 #include "Camera/FreeFlyCamera.h"
 #include "Tools/GlCheckError.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 Camera* m_camera = nullptr;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -114,6 +118,9 @@ int main(int argc, char* argv[])
 	shader.Use();
 
 	m_camera = new FPSCamera();
+
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile("path", aiProcess_Triangulate | aiProcess_FlipUVs);
 
 	//----------texture
 
