@@ -147,9 +147,9 @@ inline void FPSCamera::Update(float deltaTime)
 {
 	const float cameraSpeed = m_isBoostKeyPressed ? SPEED_BOOSTED : SPEED_DEFAULT;
 	if(m_isUpKeyPressed)
-		m_pos += cameraSpeed * glm::vec3(m_front.x, 0, m_front.z) * deltaTime;
+		m_pos += cameraSpeed * glm::normalize(glm::vec3(m_front.x, 0, m_front.z)) * deltaTime;
 	if(m_isDownKeyPressed)
-		m_pos -= cameraSpeed * glm::vec3(m_front.x, 0, m_front.z) * deltaTime;
+		m_pos -= cameraSpeed * glm::normalize(glm::vec3(m_front.x, 0, m_front.z)) * deltaTime;
 	if(m_isLeftKeyPressed)
 		m_pos -= glm::normalize(glm::cross(m_front, UP)) * cameraSpeed * deltaTime;
 	if(m_isRightKeyPressed)
