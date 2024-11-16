@@ -81,6 +81,10 @@ GLFWwindow* WindowSetup()
 	glfwMakeContextCurrent(window);
 
 #if defined(__linux__) && !defined(FULLSCREEN)
+	/*
+	* based on https://discourse.glfw.org/t/not-able-to-set-window-position/166/9,
+	* in order to set glfw window position correctly on linux, you have to do it twice!
+	*/
 	glfwSetWindowPos(window, 0, 50);
 	glfwShowWindow(window);
 	glfwSetWindowSize(window, SCRWIDTH, SCRHEIGHT);
