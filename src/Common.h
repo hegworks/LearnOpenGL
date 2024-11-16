@@ -1,4 +1,6 @@
 ﻿#pragma once
 
-constexpr int SCRWIDTH = 800;
-constexpr int SCRHEIGHT = 600;
+//#define FULLSCREEN // uncomment to full screen
+
+constexpr int SCRWIDTH = 960;
+constexpr int SCRHEIGHT = 540;

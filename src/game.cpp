@@ -86,6 +86,10 @@ GLFWwindow* WindowSetup()
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+#ifdef FULLSCREEN
+	glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 1920, 1080, 144);
+#endif // FULLSCREEN
+
 	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -340,7 +344,7 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 projection = identity;
-		projection = glm::perspective(glm::radians(m_camera->GetFov()), 4.0f / 3.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(m_camera->GetFov()), 16.0f / 9.0f, 0.1f, 100.0f);
 		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		//=====transformations
