@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 #include "Common.h"
@@ -20,7 +19,6 @@
 #include "Camera/FreeFlyCamera.h"
 
 #include "Model/Model.h"
-#include <filesystem>
 
 Camera* m_camera = nullptr;
 
@@ -114,21 +112,8 @@ GLFWwindow* WindowSetup()
 	return window;
 }
 
-int main(int argc, char* argv[])
+void MakeContainer(Shader& shader, unsigned int* vao, unsigned int* vbo, unsigned int* texture0, unsigned int* texture1)
 {
-	printf("Hello world\n");
-
-	GLFWwindow* window = WindowSetup();
-	if(window == nullptr) return -1;
-
-	int nrAttributes;
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
-
-	m_camera = new FPSCamera();
-
-	stbi_set_flip_vertically_on_load(true);
-
 	//----------objects initialization
 	//-----points
 	constexpr int point_count = 36;
@@ -184,31 +169,72 @@ int main(int argc, char* argv[])
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-
-	glm::vec3 cubePositions[] =
-	{
-	glm::vec3(0.0f,			0.0f,	0.0f),
-	glm::vec3(1.0f * 2.0f,	0.0f,	-1.0f * 2.0f),
-	glm::vec3(2.0f * 2.0f,	0.0f,	-1.0f * 2.0f),
-	glm::vec3(3.0f * 2.0f,	0.0f,	-1.0f * 2.0f),
-	glm::vec3(1.0f * 2.0f,	0.0f,	-2.0f * 2.0f),
-	glm::vec3(2.0f * 2.0f,	0.0f,	-2.0f * 2.0f),
-	glm::vec3(3.0f * 2.0f,	0.0f,	-2.0f * 2.0f),
-	glm::vec3(1.0f * 2.0f,	0.0f,	-3.0f * 2.0f),
-	glm::vec3(2.0f * 2.0f,	0.0f,	-3.0f * 2.0f),
-	glm::vec3(3.0f * 2.0f,	0.0f,	-3.0f * 2.0f)
-	};
 	//=====points
+
+	unsigned int containerTexture;
+	glGenTextures(1, &containerTexture);
+	*texture0 = containerTexture;
+
+	unsigned int awesomefaceTexture;
+	glGenTextures(1, &awesomefaceTexture);
+	*texture1 = awesomefaceTexture;
+	//=====
+
+	//-----
+	glBindTexture(GL_TEXTURE_2D, containerTexture);
+	float borderColor[] = {1.0f, 1.0f, 0.0f, 1.0f};
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nrChannels;
+
+	unsigned char* containerTextureData = stbi_load("Assets/container.jpg", &width, &height, &nrChannels, 0);
+	if(!containerTextureData)
+	{
+		std::cout << "ERROR::STBI::LOAD Failed to load texture: Assets/container.jpg" << std::endl;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
+	glCheckError();
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//=====
+
+	//-----
+	glBindTexture(GL_TEXTURE_2D, awesomefaceTexture);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	unsigned char* awesomefaceTextureData = stbi_load("Assets/awesomeface.png", &width, &height, &nrChannels, 0);
+	if(!awesomefaceTextureData)
+	{
+		std::cout << "ERROR::STBI::LOAD Failed to load texture: Assets/awesomeface.png" << std::endl;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, awesomefaceTextureData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//=====
+
+	//-----
+	shader.Use();
+	shader.SetInt("uTexture0", 0);
+	shader.SetInt("uTexture1", 1);
+	//=====
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(containerTextureData);
 
 	//-----Initialization
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
+	*vao = VAO;
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
-
-	//unsigned int EBO;
-	//glGenBuffers(1, &EBO);
+	*vbo = VBO;
 	//=====Initialization
 
 	//-----Binding
@@ -216,18 +242,11 @@ int main(int argc, char* argv[])
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	glCheckError();
 	//=====Binding
 
 	// VertexAttribute
 	glVertexAttribPointer(0, position_parts, GL_FLOAT, GL_FALSE, stride, (void*)(position_offset));
 	glEnableVertexAttribArray(0);
-
-	//glVertexAttribPointer(1, color_parts, GL_FLOAT, GL_FALSE, stride, (void*)(color_offset));
-	//glEnableVertexAttribArray(1);
 
 	glVertexAttribPointer(2, texture_parts, GL_FLOAT, GL_FALSE, stride, (void*)(texture_offset));
 	glEnableVertexAttribArray(2);
@@ -235,8 +254,27 @@ int main(int argc, char* argv[])
 	// UnBinding
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	//==========objects initialization
+}
+
+int main(int argc, char* argv[])
+{
+	printf("Hello world\n");
+
+	GLFWwindow* window = WindowSetup();
+	if(window == nullptr) return -1;
+
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
+
+	m_camera = new FPSCamera();
+
+	stbi_set_flip_vertically_on_load(true);
+
+	unsigned int VAO, VBO, texture0, texture1;
+	Shader containerShader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Fragment.frag");
+	MakeContainer(containerShader, &VAO, &VBO, &texture0, &texture1);
 
 	//----------other options
 	// Wireframe
@@ -246,61 +284,78 @@ int main(int argc, char* argv[])
 	glEnable(GL_DEPTH_TEST);
 	//==========other options
 
-	float deltaTime = 0;
-	float mixValue = 0.5f;
-	const float mixChangeSpeed = 0.6f;
-	constexpr glm::mat4 identity = glm::mat4(1.0f);
-
-	Shader modelShader = Shader("src/Shaders/Model.vert", "src/Shaders/Model.frag");
-	glCheckError();
-	modelShader.Use();
+	Shader backpackShader = Shader("src/Shaders/Model.vert", "src/Shaders/Model.frag");
 	Model* backpack = new Model("Assets/Models/Backpack/backpack.obj");
 
-
+	float deltaTime = 0;
+	constexpr glm::mat4 identity = glm::mat4(1.0f);
+	glm::mat4 model = identity;
+	glm::mat4 view = identity;
+	glm::mat4 projection = identity;
 	while(!glfwWindowShouldClose(window))
 	{
 		const double frameStartTime = glfwGetTime();
 
-		// input
 		processInput(window);
-		//if(isDownKeyPressed || isUpKeyPressed)
-		//{
-		//	mixValue += isDownKeyPressed ? -mixChangeSpeed * deltaTime : +mixChangeSpeed * deltaTime;
-		//	mixValue = mixValue > 1.0f ? 1.0f : mixValue;
-		//	mixValue = mixValue < 0.0f ? 0.0f : mixValue;
-		//	shader.SetFloat("uMix", mixValue);
-		//}
 
-		//-----Camera
+		//--View
+		view = identity;
 		m_camera->Update(deltaTime);
 		glm::vec3 cameraPos, cameraFront, cameraUp;
 		m_camera->GetCameraProperties(cameraPos, cameraFront, cameraUp);
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		//=====Camera
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		//==View
 
-		glm::mat4 projection = identity;
+		//==Projection
+		projection = identity;
 		projection = glm::perspective(glm::radians(m_camera->GetFov()), 16.0f / 9.0f, 0.1f, 100.0f);
+		//--Projection
 
-		//-----render
+		//----render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//===Backpack
-		modelShader.Use();
+		//==Container
+		containerShader.Use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture1);
 
-		glUniformMatrix4fv(modelShader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
+		glBindVertexArray(VAO);
 
-		glUniformMatrix4fv(modelShader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
+		containerShader.SetMat4("uView", view);
+		containerShader.SetMat4("uProjection", projection);
 
-		glm::mat4 bpModel = identity;
-		bpModel = glm::translate(bpModel, glm::vec3(-2, 2, -2));
-		bpModel = glm::scale(bpModel, glm::vec3(0.5));
-		glUniformMatrix4fv(modelShader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(bpModel));
-		backpack->Draw(modelShader);
-		//---Backpack
 
-		//=====transformations
+		for(int i = -25; i < 25; i++)
+		{
+			for(int j = -25; j < 25; j++)
+			{
+				model = identity;
+				model = glm::translate(model, glm::vec3(j, 0, i));
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+				containerShader.SetMat4("uModel", model);
+			}
+		}
 
-		//=====render
+		glBindVertexArray(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		//==Container
+
+		//==Backpack
+		backpackShader.Use();
+		backpackShader.SetMat4("uView", view);
+		backpackShader.SetMat4("uProjection", projection);
+
+		model = identity;
+		model = glm::translate(model, glm::vec3(-2, 2, -2));
+		model = glm::scale(model, glm::vec3(0.5));
+		backpackShader.SetMat4("uModel", model);
+
+		backpack->Draw(backpackShader);
+		//--Backpack
+
+		//====render
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
@@ -312,8 +367,8 @@ int main(int argc, char* argv[])
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	//glDeleteBuffers(1, &EBO);
-	modelShader.Delete();
+	backpackShader.Delete();
+	containerShader.Delete();
 	glfwTerminate();
 	return 0;
 }

@@ -132,7 +132,6 @@ inline unsigned int Model::TextureFromFile(const char* path, const std::string& 
 	}
 
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glCheckError();
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -140,11 +139,9 @@ inline unsigned int Model::TextureFromFile(const char* path, const std::string& 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
-	glCheckError();
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glCheckError();
 	stbi_image_free(textureData);
 
 	return texture;
