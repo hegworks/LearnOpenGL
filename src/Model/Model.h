@@ -146,6 +146,8 @@ inline unsigned int Model::TextureFromFile(const char* path, const std::string& 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glCheckError();
 	stbi_image_free(textureData);
+
+	return texture;
 }
 
 inline std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
