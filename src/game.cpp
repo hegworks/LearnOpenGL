@@ -20,6 +20,7 @@
 #include "Camera/FreeFlyCamera.h"
 
 #include "Model/Model.h"
+#include <filesystem>
 
 Camera* m_camera = nullptr;
 
@@ -124,70 +125,9 @@ int main(int argc, char* argv[])
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
 
-	Shader shader = Shader("src/Shaders/Vertex.vert", "src/Shaders/Fragment.frag");
-	shader.Use();
-
 	m_camera = new FPSCamera();
 
-	//----------texture
-
-	//-----
-	unsigned int containerTexture;
-	glGenTextures(1, &containerTexture);
-
-	unsigned int awesomefaceTexture;
-	glGenTextures(1, &awesomefaceTexture);
-	//=====
-
-	//-----
-	glBindTexture(GL_TEXTURE_2D, containerTexture);
-	float borderColor[] = {1.0f, 1.0f, 0.0f, 1.0f};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	int width, height, nrChannels;
-
-	unsigned char* containerTextureData = stbi_load("Assets/container.jpg", &width, &height, &nrChannels, 0);
-	if(!containerTextureData)
-	{
-		std::cout << "Failed to load container.jpg texture" << std::endl;
-		return -1;
-	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
-	glCheckError();
-	glGenerateMipmap(GL_TEXTURE_2D);
-	//=====
-
-	//-----
-	glBindTexture(GL_TEXTURE_2D, awesomefaceTexture);
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	unsigned char* awesomefaceTextureData = stbi_load("Assets/awesomeface.png", &width, &height, &nrChannels, 0);
-	if(!awesomefaceTextureData)
-	{
-		std::cout << "Failed to load awesomeface.png texture" << std::endl;
-		return -1;
-	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, awesomefaceTextureData);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	//=====
-
-	//-----
-	shader.SetInt("uTexture0", 0);
-	shader.SetInt("uTexture1", 1);
-	//=====
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	stbi_image_free(containerTextureData);
-
-	//==========texture
+	stbi_set_flip_vertically_on_load(true);
 
 	//----------objects initialization
 	//-----points
@@ -312,6 +252,8 @@ int main(int argc, char* argv[])
 	constexpr glm::mat4 identity = glm::mat4(1.0f);
 
 	Shader modelShader = Shader("src/Shaders/Model.vert", "src/Shaders/Model.frag");
+	glCheckError();
+	modelShader.Use();
 	Model* backpack = new Model("Assets/Models/Backpack/backpack.obj");
 
 
@@ -336,36 +278,11 @@ int main(int argc, char* argv[])
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		//=====Camera
 
-		//-----render
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//===Boxes
-		shader.Use();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, containerTexture);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, awesomefaceTexture);
-
-		glBindVertexArray(VAO);
-
-		glUniformMatrix4fv(shader.GetUniformLocation("uView"), 1, GL_FALSE, glm::value_ptr(view));
-
 		glm::mat4 projection = identity;
 		projection = glm::perspective(glm::radians(m_camera->GetFov()), 16.0f / 9.0f, 0.1f, 100.0f);
-		glUniformMatrix4fv(shader.GetUniformLocation("uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		for(int i = -25; i < 25; i++)
-		{
-			for(int j = -25; j < 25; j++)
-			{
-				glm::mat4 model = identity;
-				model = glm::translate(model, glm::vec3(j, 0, i));
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-				glUniformMatrix4fv(shader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(model));
-			}
-		}
-		//---Boxes
+		//-----render
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//===Backpack
 		modelShader.Use();
@@ -376,15 +293,12 @@ int main(int argc, char* argv[])
 
 		glm::mat4 bpModel = identity;
 		bpModel = glm::translate(bpModel, glm::vec3(-2, 2, -2));
+		bpModel = glm::scale(bpModel, glm::vec3(0.5));
 		glUniformMatrix4fv(modelShader.GetUniformLocation("uModel"), 1, GL_FALSE, glm::value_ptr(bpModel));
 		backpack->Draw(modelShader);
 		//---Backpack
 
 		//=====transformations
-
-
-		glBindVertexArray(0);
-		glBindTexture(GL_TEXTURE_2D, 0);
 
 		//=====render
 
@@ -399,7 +313,6 @@ int main(int argc, char* argv[])
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	//glDeleteBuffers(1, &EBO);
-	shader.Delete();
 	modelShader.Delete();
 	glfwTerminate();
 	return 0;

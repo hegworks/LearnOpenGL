@@ -14,7 +14,7 @@ struct Texture;
 class Model
 {
 public:
-	Model(const char* path)
+	Model(std::string const& path)
 	{
 		loadModel(path);
 	}
@@ -24,13 +24,13 @@ public:
 private:
 	// model data
 	std::vector<Mesh> meshes;
-	std::string directory;
+	std::string m_directory;
 	std::vector<Texture> textures_loaded;
 
 	void loadModel(std::string path);
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	unsigned int TextureFromFile(const char* cStr, const std::string& string);
+	unsigned int TextureFromFile(const char* path, const std::string& directory);
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 };
 
@@ -42,15 +42,14 @@ inline void Model::Draw(Shader& shader)
 
 inline void Model::loadModel(std::string path)
 {
-	Assimp::Importer import;
-	const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
-
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 	if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
 		return;
 	}
-	directory = path.substr(0, path.find_last_of('/'));
+	m_directory = path.substr(0, path.find_last_of('/'));
 
 	processNode(scene->mRootNode, scene);
 }
@@ -96,15 +95,11 @@ inline Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 	}
 	// process material
-	if(mesh->mMaterialIndex >= 0)
-	{
-		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	}
-
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+	std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	return Mesh(vertices, indices, textures);
 }
 
@@ -137,6 +132,7 @@ inline unsigned int Model::TextureFromFile(const char* path, const std::string& 
 	}
 
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glCheckError();
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -144,9 +140,11 @@ inline unsigned int Model::TextureFromFile(const char* path, const std::string& 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
+	glCheckError();
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glCheckError();
 	stbi_image_free(textureData);
 }
 
@@ -170,9 +168,9 @@ inline std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextu
 		if(!wasTextureLoadedBefore)
 		{
 			Texture texture;
-			texture.m_id = TextureFromFile(str.C_Str(), directory);
+			texture.m_id = TextureFromFile(str.C_Str(), m_directory);
 			texture.m_type = typeName;
-			texture.m_path = str;
+			texture.m_path = str.C_Str();
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}

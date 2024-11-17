@@ -52,8 +52,8 @@ inline void Mesh::Draw(Shader& shader)
 	unsigned int specularNr = 1;
 	for(unsigned int i = 0; i < m_textures.size(); i++)
 	{
-		glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-		// retrieve texture number (the N in diffuse_textureN)
+		glActiveTexture(GL_TEXTURE0 + i);
+		glCheckError();
 		std::string number;
 		std::string name = m_textures[i].m_type;
 		if(name == "texture_diffuse")
@@ -61,15 +61,16 @@ inline void Mesh::Draw(Shader& shader)
 		else if(name == "texture_specular")
 			number = std::to_string(specularNr++);
 
-		shader.SetInt("material." + name + number, i);
+		shader.SetInt(name + number, i);
 		glBindTexture(GL_TEXTURE_2D, m_textures[i].m_id);
+		std::cout << i << " id:" << m_textures[i].m_id << " path:" << m_textures[i].m_path.C_Str() << " type: " << m_textures[i].m_type << std::endl;
+		glCheckError();
 	}
-	glActiveTexture(GL_TEXTURE0);
-
-	// draw mesh
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0);
 }
 
 inline void Mesh::SetupMesh()
